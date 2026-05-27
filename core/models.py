@@ -111,3 +111,59 @@ class UserPreferences(models.Model):
         return f"{self.user.email} - Preferences"
 
 
+# Add this at the bottom of core/models.py
+class FundingRequest(models.Model):
+    borrower = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name='funding_requests')
+    title = models.CharField(max_length=200) # e.g., "Artisan Weaver Expansion"
+    description = models.TextField()
+    target_amount = models.DecimalField(max_digits=12, decimal_places=2)
+    raised_amount = models.DecimalField(max_digits=12, decimal_places=2, default=0.00)
+    is_fully_funded = models.BooleanField(default=False)
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    def __str__(self):
+        return f"{self.borrower.email} - {self.title}"
+
+class Endorsement(models.Model):
+    endorser = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name='endorsements_given')
+    endorsee = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name='endorsements_received')
+    date_vouched = models.DateTimeField(auto_now_add=True)
+    status = models.CharField(max_length=20, default="Active")
+
+    def __str__(self):
+        return f"{self.endorser.email} vouched for {self.endorsee.email}"
+
+
+# Add this at the bottom of core/models.py
+class OracleMessage(models.Model):
+    SENDER_CHOICES = (('USER', 'User'), ('ORACLE', 'Oracle'))
+
+    user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name='oracle_messages')
+    sender = models.CharField(max_length=10, choices=SENDER_CHOICES)
+    message = models.TextField()
+    timestamp = models.DateTimeField(auto_now_add=True)
+
+    def __str__(self):
+        return f"{self.sender} to {self.user.email} at {self.timestamp}"
+
+
+class BankCard(models.Model):
+    CARD_TYPES = (('PHYSICAL', 'Physical Card'), ('VIRTUAL', 'Virtual Card'))
+
+    user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name='cards')
+    card_type = models.CharField(max_length=20, choices=CARD_TYPES)
+    name_on_card = models.CharField(max_length=100)
+    last_four = models.CharField(max_length=4)
+    expiry_date = models.CharField(max_length=5)
+    cvc_dummy = models.CharField(max_length=3, default="***")
+
+    is_frozen = models.BooleanField(default=False)
+    online_payments = models.BooleanField(default=True)
+    international_spend = models.BooleanField(default=False)
+    contactless = models.BooleanField(default=True)
+
+    monthly_limit = models.DecimalField(max_digits=12, decimal_places=2, default=500000.00)
+    current_spend = models.DecimalField(max_digits=12, decimal_places=2, default=0.00)
+
+    def __str__(self):
+        return f"{self.user.email} - {self.card_type} (*{self.last_four})"

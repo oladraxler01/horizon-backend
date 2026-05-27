@@ -13,3 +13,6 @@ db.sqlite3
 
 # OS generated files
 .DS_Store
+
+#geminin api key
+.env
