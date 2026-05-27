@@ -131,4 +131,4 @@ REST_FRAMEWORK = {
 }
 
 # Add this anywhere near the bottom of the file
-GEMINI_API_KEY = os.environ.get("AIzaSyC7IYlU7q8APot-KsH85eWiEJbUvQIwILg")
+GEMINI_API_KEY = os.environ.get("GEMINI_API_KEY")
